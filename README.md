@@ -1,16 +1,18 @@
 HV4D
 ====
 
+
+
 Implementation of [HV4D] (https://eden.dei.uc.pt/~cmfonsec/guerreiro-cccg2012.pdf), an algorithm to compute the hypervolume indicator in four dimensions, in quadratic time. Minimization is assumed.
 
 
-**Note**: Although only *nondominated* points that strongly dominate the reference point contribute to the hypervolume, the code is prepared to deal with all other points, including *repeated* points, which are all ignored (in the case of repeated points, one of the copies is considered, and the remaining ones are discarded). An error will be raised only if none of the points strongly dominates the reference point. Moreover, different points may have (some) equal coordinates.
+**Note**: Although only *nondominated* points that strongly dominate the reference point contribute to the hypervolume, the code is prepared to deal with all other points, including *repeated* points, which are all ignored (in the case of repeated points, one of the copies is considered, and the remaining ones are discarded). Warnings will be raised if any of the points do not strongly dominate the reference point. Moreover, different points may have (some) equal coordinates.
 
 
 
 License
 --------
-
+	
 
 Except where indicated otherwise in individual source files, this software is Copyright © 2011, 2017 Andreia P. Guerreiro.
 

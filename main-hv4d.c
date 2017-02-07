@@ -342,9 +342,11 @@ hv_file (const char *filename, double *reference,
         Timer_start ();
         volume = hv4d (&data[nobj * cumsize],
                             cumsizes[n] - cumsize, reference);
-        if (volume == 0.0) {
-            errprintf ("none of the points strictly dominates the reference point\n");
-            exit (EXIT_FAILURE);
+        if (volume <= 0.0) {
+            warnprintf ("%s: none of the points strongly dominates the reference point",
+                            filename);
+//             errprintf ("none of the points strictly dominates the reference point\n");
+//             exit (EXIT_FAILURE);
         }
 
         time_elapsed_cpu = Timer_elapsed_virtual ();

@@ -70,6 +70,23 @@ typedef struct dlnode {
 } dlnode_t;
 
 
+//box
+typedef struct bx{
+    double lx, ly, lz;
+    double ux, uy, uz;
+
+    struct bx * next;
+    struct bx * prev;
+}box;
+
+//box list
+typedef struct bxl{
+    box * head;
+    box * tail;
+}boxlist;
+
+
+
 static int compare_node(const void *p1, const void* p2)
 {
     const double x1 = *((*(const dlnode_t **)p1)->x+3);
@@ -78,28 +95,42 @@ static int compare_node(const void *p1, const void* p2)
     return (x1 < x2) ? -1 : (x1 > x2) ? 1 : 0;
 }
 
+
+static int strongly_dominates(double * x1, const double * ref){
+    int i;
+    for(i = 0; i < 4 && x1[i] < ref[i]; i++);
+    return (i == 4);
+}
+
+
 /*
  * Setup circular double-linked list in each dimension
+ * and exclude points that do not strongly dominate the reference point.
+ * size will return the number of points that strongly dominate the reference
  */
-
-
 static dlnode_t *
-setup_cdllist(double *data, int n, const double *ref)
+setup_cdllist(double *data, int * size, const double *ref)
 {
     int d = 4;
     dlnode_t *head;
     dlnode_t **scratch;
     int i, j;
 
+    int n = *size;
     head  = malloc ((n+1) * sizeof(dlnode_t));
 
 
-
-    for (i = 1; i <= n; i++) {
-        for(j = 0; j < d; j++)
-            head[i-1].x[j] = data[(i-1)*d + j];
+    int lasti = 0;
+    for (i = 0; i < n; i++) {
         
+        if(strongly_dominates(data + i*d, ref)){
+            for(j = 0; j < d; j++){
+                head[lasti].x[j] = data[i*d + j];
+            }
+            lasti++;
+        }
     }
+    n = lasti; //shrink n in case some points do not strongly dominate ref
     
     head[n].x[0] = head[n].x[1] = head[n].x[2] = -DBL_MAX;
     head[n].x[3] = ref[3];
@@ -126,6 +157,8 @@ setup_cdllist(double *data, int n, const double *ref)
             head[i].x[j] = data2[i*d + j];
     }
 
+    *size = n;
+    
     free(data2);
 
     free(scratch);
@@ -148,20 +181,6 @@ static void free_sentinels(dlnode_t * list){
         
 }
 
-//box
-typedef struct bx{
-    double lx, ly, lz;
-    double ux, uy, uz;
-
-    struct bx * next;
-    struct bx * prev;
-}box;
-
-//box list
-typedef struct bxl{
-    box * head;
-    box * tail;
-}boxlist;
 
 //note: it is not necessary to define uz
 static box * new_box(double lx, double ly, double lz, double ux, double uy, double uz){
@@ -497,14 +516,12 @@ hv4d_increment3D(dlnode_t *list, dlnode_t *p, const double * ref){
 static double
 hv4dA(dlnode_t *list, int c, const double * ref)
 {
-
     dlnode_t *p = list;
     double hyperv = 0; //hvol4D
     double hypera = 0; //hvol3D
         
     int i;
     for (i = 0; i < c; i++) {
-
         hypera = hypera + hv4d_increment3D(list+c, p, ref);
         hyperv = hyperv + hypera * ((p+1)->x[3] - p->x[3]);
         p++;
@@ -578,22 +595,22 @@ double hv4d(double *data, int n, const double *ref)
 {
     dlnode_t *list;
     double hyperv;
+    int nv = n;
 
     if (n == 0) { 
-        /* Returning here would leak memory.  */
         hyperv = 0.0;
     } else {
 
-        list = setup_cdllist(data, n, ref);
-      
-        add_sentinels(list+n, ref);
-
-        hyperv = hv4dA(list, n, ref);
+        list = setup_cdllist(data, &nv, ref);
+        //nv <= n (number of points that strongly dominate ref)
         
-        free_sentinels(list+n);
+        add_sentinels(list+nv, ref);
+        
+        hyperv = hv4dA(list, nv, ref);
+        
+        free_sentinels(list+nv);
         /* Clean up.  */
         free_cdllist (list);
-    
       
     }
     
