@@ -6,7 +6,7 @@ HV4D
 Implementation of [HV4D] (https://eden.dei.uc.pt/~cmfonsec/guerreiro-cccg2012.pdf), an algorithm to compute the hypervolume indicator in four dimensions, in quadratic time. Minimization is assumed.
 
 
-**Note**: Although only *nondominated* points that strongly dominate the reference point contribute to the hypervolume, the code is prepared to deal with all other points, including *repeated* points, which are all ignored (in the case of repeated points, one of the copies is considered, and the remaining ones are discarded). Warnings will be raised if any of the points do not strongly dominate the reference point. Moreover, different points may have (some) equal coordinates.
+**Note**: Although only *nondominated* points that strongly dominate the reference point contribute to the hypervolume, the code is prepared to deal with all other points, including *repeated* points, which are all ignored (in the case of repeated points, one of the copies is considered, and the remaining ones are skipped). Warnings will be raised if any of the points do not strongly dominate the reference point. Moreover, different points may have (some) equal coordinates.
 
 
 
@@ -32,15 +32,15 @@ In GNU/Linux, the program can be compiled from source by invoking:
 
     make
 
-We recommend that you compile it specifically for your architecture. Depending on the compiler and version of the compiler you use, there are different ways to achieve this. For recent GCC versions, make will pick a suitable -march argument based on the processor of the build machine. This can be overridden by passing a `MARCH=` argument to make. Similarly if you use the Intel C compiler, it will pick a sensible default architecture (`-xHOST`) for you. If you want to override this, pass `XARCH=` to `make`. So, to build for an Intel *Core2*, you would use:
+It is recommended that you compile it specifically for your architecture. Depending on the compiler and version of the compiler you use, there are different ways to achieve this. For recent GCC versions, make will pick a suitable -march argument based on the processor of the build machine. This can be overridden by passing a `MARCH=` argument to make. Similarly if you use the Intel C compiler, it will pick a sensible default architecture (`-xHOST`) for you. If you want to override this, pass `XARCH=` to `make`. So, to build for an Intel *Core2* with the GCC compiler, you would use:
 
     make MARCH=core2
 
-If you are using the GCC compiler and:
+For the Intel C compiler you should use:
 
     make XARCH=SSSE3
 
-For the Intel C compiler. Generally, `make` will try to pick good flags for you, but you can override them by passing `OPT_CFLAGS` argument to `make` if you wish. To build an unoptimized version of `hv4d` you could run:
+Generally, `make` will try to pick good flags for you, but you can override them by passing an `OPT_CFLAGS` argument to `make` if you wish. To build an unoptimized version of `hv4d` you could run:
 
     make OPT_CFLAGS="-O0 -g"
 
@@ -69,9 +69,9 @@ With no FILE, read from the standard input.
 	     --version       print version number and exit.                        
 	 -v, --verbose       print some information (time, coordinate-wise maximum 
 		             	 and minimum, etc)                                     
-	 -q, --quiet         print just the hypervolume (as opposed to --verbose). 
+	 -q, --quiet         print only the hypervolume (as opposed to --verbose). 
 	 -u, --union         treat all input sets within a FILE as a single set.   
-	 -r, --reference=POINT use POINT as reference point. POINT must be within  
+	 -r, --reference=POINT use POINT as the reference point. POINT must be within  
 		                 quotes, e.g., "10 10 10". If no reference point is  
 		                 given, it is taken as the coordinate-wise maximum of  
 		                 all input points.                                     
@@ -92,7 +92,7 @@ or standard input:
 
     cat data | ./hv4d
 
-In input files, each point is given in a separate line, and each coordinate within a line is separated by whitespace. An empty line, or a line beginning with a  hash sign (#), denotes a separate set.
+In input files, each point is given in a separate line, and point coordinates in each line are separated by whitespace. An empty line, or a line beginning with a  hash sign (#), denotes a separate set.
 
 
 Sets in an input file may be treated as a single set by using option `-u`: 
@@ -100,7 +100,7 @@ Sets in an input file may be treated as a single set by using option `-u`:
     ./hv4d data -u
 
 
-A reference point can be set by giving option `-r`.
+The reference point can be set by giving option `-r`.
 
     ./hv4d -r "10 10 10 10" data
 
@@ -154,19 +154,24 @@ Example of a basic compilation:
 
 **Execution**
 
-The code can be tested with any of the data sets provided together with the code in folder `examples`. After compilation, run:
+The code can be tested with any of the data sets provided in folder `examples`. After compilation, run:
 
     ./hv4d examples/exampleInput.inp -r "1.1 1.1 1.1 1.1" 
     
 
-The hypervolume indicator of each of the 2 data sets in `exampleInput.inp ` considering the reference point `(1.1, 1.1, 1.1, 1.1)` will be printed in separate lines, in the same order as the point sets in the input file.
+The hypervolume indicator of each of the 2 data sets in `exampleInput.inp ` given the reference point `(1.1, 1.1, 1.1, 1.1)` will be printed in separate lines, in the same order as the point sets in the input file:
+
+	0.936963193064112
+	0.861528076506543
 
 By running:
 
 
     ./hv4d examples/exampleInput.inp -r "1.1 1.1 1.1 1.1" -u
     
-the result will be the hypervolume indicator of the union of the two sets in the file.
+the result will be the hypervolume indicator of the union of the two sets in the file:
+
+	1.05104266084533
     
     
 
