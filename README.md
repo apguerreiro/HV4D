@@ -179,7 +179,7 @@ the result will be the hypervolume indicator of the union of the two sets in the
 Other sources
 -------------
 
-This code is also integrated in [PyGMO](http://esa.github.io/pygmo/index.html), and can be found [here](https://github.com/esa/pagmo/tree/master/src/util/hv_algorithm/hv4d_cpp_original).
+Version 1.1 of this code is also integrated in [PyGMO](http://esa.github.io/pygmo/index.html), and can be found [here](https://github.com/esa/pagmo/tree/master/src/util/hv_algorithm/hv4d_cpp_original).
 
 
 References
